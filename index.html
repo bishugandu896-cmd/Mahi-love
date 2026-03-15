@@ -3,112 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Romantic Website for Mahi</title>
+    <title>A Romantic Experience for Mahi</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, pink, purple);
-            animation: gradient 15s ease infinite;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #ffcccb, #ff99cc);
             overflow: hidden;
+            position: relative;
+            color: #ffffff;
         }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        #container {
+        .header {
             text-align: center;
-            color: white;
-            z-index: 1;
+            padding: 50px;
+            font-size: 3em;
+            text-shadow: 2px 2px 10px rgba(255, 0, 0, 0.8);
         }
-
-        .rose {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            animation: bloom 5s infinite;
-        }
-
-        @keyframes bloom {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .star {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 1.5s infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        .falling-petal {
-            position: absolute;
-            animation: fall 4s infinite;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(100vh); }
-        }
-
-        .button {
-            padding: 10px 20px;
-            background-color: purple;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .button:hover {
-            transform: scale(1.1);
-            animation: confetti 0.5s forwards;
-        }
-
-        @keyframes confetti {
-            from { transform: scale(1); }
-            to { transform: scale(1); } /* Add confetti effect here */
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+        .reasons, .gallery {
+            max-width: 1200px;
+            margin: auto;
             padding: 20px;
-            margin: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
-
-        /* Add more styles for reasons and memories sections */
+        .reason, .memory {
+            padding: 20px;
+            background: rgba(255, 20, 147, 0.7);
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        .reason:hover, .memory:hover {
+            transform: scale(1.05);
+        }
+        .animated-roses {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('roses.png');
+            background-size: cover;
+            opacity: 0.1;
+            animation: fade 10s infinite;
+        }
+        @keyframes fade {
+            0% { opacity: 0.1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.1; }
+        }
     </style>
 </head>
 <body>
-    <div id="container">
-        <h1>Welcome to Mahi's Romantic Website!</h1>
-        <p>Some love messages here...</p>
-        <button class="button">I Love You!</button>
-        <div class="rose"></div>
-        <div class="star" style="left: 10%; top: 20%;"></div>
-        <div class="falling-petal" style="left: 30%; animation-delay: 2s;"></div>
-        <div class="falling-petal" style="left: 70%; animation-delay: 3s;"></div>
-        <!-- Continue adding more petals and stars -->
+    <div class="animated-roses"></div>
+    <div class="header">For Mahi, My Love</div>
+    <div class="reasons">
+        <div class="reason">You make me smile.</div>
+        <div class="reason">Your laughter is my favorite sound.</div>
+        <div class="reason">You are my best friend.</div>
+        <div class="reason">I love your kindness.</div>
+        <div class="reason">You inspire me every day.</div>
+    </div>
+    <div class="gallery">
+        <div class="memory">Memory 1 Description</div>
+        <div class="memory">Memory 2 Description</div>
+        <div class="memory">Memory 3 Description</div>
+        <div class="memory">Memory 4 Description</div>
     </div>
     <script>
-        // JavaScript for dynamic effects
-        // Implement dynamic messages, confetti effects, etc.
+        // JavaScript for effects
+        document.body.addEventListener('mousemove', function(e) {
+            const hearts = document.createElement('div');
+            hearts.classList.add('heart');
+            hearts.style.left = e.pageX + 'px';
+            hearts.style.top = e.pageY + 'px';
+            document.body.appendChild(hearts);
+            setTimeout(() => hearts.remove(), 1000);
+        });
     </script>
 </body>
 </html>
