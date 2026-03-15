@@ -3,34 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Romantic Love</title>
+    <link rel="stylesheet" href="styles.css">
+    <title>My Interactive Web Page</title>
     <style>
         body {
-            background-color: #ffcccb;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            font-family: Arial, sans-serif;
+            animation: fadeIn 2s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         h1 {
-            color: #d5006d;
+            text-align: center;
+            margin-top: 50px;
             font-size: 3em;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
         }
-        .rose {
-            width: 100px;
-            animation: sway 3s infinite alternate;
+        .button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            background: #ff4081;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-size: 1.5em;
         }
-        @keyframes sway {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(20px, 0); }
+        .button:hover {
+            background: #f50057;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My Romantic Love Page</h1>
-    <img class="rose" src="https://example.com/rose.png" alt="Rose">
-    <p>Love is not just a word, it's a beautiful emotion that brings joy and happiness.</p>
-    <p>🌹🌸🌼</p>
-    <footer>
-        <p>Created with love on 2026-03-15</p>
-    </footer>
+    <h1>Welcome to My Interactive Web Page</h1>
+    <a href="#" class="button">Click Me!</a>
+    <script>
+        document.querySelector('.button').addEventListener('click', function() {
+            alert('Button clicked!');
+        });
+    </script>
 </body>
 </html>
