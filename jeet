@@ -1,0 +1,102 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+
+const BIZ = [
+  { v:"salon",e:"\ud83d\udc87",l:"Salon / Parlour",clr:"#f472b6" },
+  { v:"clinic",e:"\ud83c\udfe5",l:"Clinic / Doctor",clr:"#60a5fa" },
+  { v:"coaching",e:"\ud83d\udcda",l:"Coaching / Tuition",clr:"#fbbf24" },
+  { v:"restaurant",e:"\ud83c\udf5c",l:"Restaurant / Dhaba",clr:"#fb923c" },
+  { v:"gym",e:"\ud83c\udfcb\ufe0f",l:"Gym / Fitness",clr:"#a78bfa" },
+  { v:"shop",e:"\ud83d\uded2",l:"Shop / Store",clr:"#34d399" },
+];
+const LANGS=[{v:"hinglish",l:"Hinglish (Hindi+English)"},{v:"hindi",l:"Hindi only"},{v:"english",l:"English only"},{v:"marathi",l:"Marathi+English"}];
+const uid=()=>Math.random().toString(36).slice(2,8);
+const nowT=()=>new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+const fmtD=d=>new Date(d).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+const inr=n=>"\u20b9"+Number(n).toLocaleString("en-IN");
+const getBiz=v=>BIZ.find(b=>b.v===v)||BIZ[0];
+
+async function callClaude(messages,system="",maxTokens=800){
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:maxTokens,system,messages})});
+  const d=await r.json();
+  return d.content?.map(b=>b.text||"").join("")||"";
+}
+
+async function generateConfig(bot){
+  const sys=`You are BotWala AI. Return ONLY valid JSON, no markdown, no extra text.
+{
+  "greeting":"...",
+  "menuText":"...",
+  "responses":{"book":"...","price":"...","hours":"...","location":"...","default":"..."},
+  "quickReplies":["...","...","...","..."],
+  "personality":"..."
+}
+Language: hinglish=natural Hindi+English roman, hindi=roman Hindi, english=English. Use emojis. Max 4 lines per response.`;
+  const prompt=`Name:${bot.name} Type:${bot.type} Services:${bot.services||"standard"} Hours:${bot.hours||"9am-9pm"} Location:${bot.location||"\u2014"} Language:${bot.lang} Extra:${bot.extra||"none"}`;
+  const text=await callClaude([{role:"user",content:prompt}],sys,1000);
+  try{return JSON.parse(text.replace(/```json|```/g,"").trim());}catch{return null;}
+}
+
+async function chatReply(bot,cfg,history,userMsg){
+  const sys=`You are a WhatsApp chatbot for "${bot.name}" (${bot.type}).
+Personality:${cfg?.personality||"friendly"}. Language:${bot.lang}.
+Services:${bot.services||"standard"}. Hours:${bot.hours||"9-9"}. Location:${bot.location||"\u2014"}.
+Reply in max 4 lines, no markdown, use emojis, be helpful.`;
+  const msgs=[...history.slice(-6).map(m=>({role:m.role,content:m.text})),{role:"user",content:userMsg}];
+  return callClaude(msgs,sys,250);
+}
+
+const S={
+  bg:"#0d0d0d",card:"#161616",border:"#222",borderL:"#2a2a2a",
+  text:"#f0f0ec",muted:"#666",faint:"#1a1a1a",
+  green:"#25D366",greenD:"#128C7E",greenFaint:"rgba(37,211,102,0.08)",greenB:"rgba(37,211,102,0.2)",
+};
+
+const css=`
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:${S.bg};color:${S.text};overflow:hidden;}
+input,select,textarea,button{font-family:'Outfit',sans-serif;}
+input:focus,select:focus,textarea:focus{outline:none;}
+::placeholder{color:#333;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.fade{animation:fadeIn .25s ease both;}
+.spin{animation:spin .9s linear infinite;}
+.msg{animation:msgIn .2s ease both;}
+input[type=range]{-webkit-appearance:none;height:3px;border-radius:2px;background:#2a2a2a;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:${S.green};cursor:pointer;}
+`;
+
+function Spinner({s=16,c=S.green}){return <div className="spin" style={{width:s,height:s,border:"2px solid #222",borderTopColor:c,borderRadius:"50%"}}/>;}
+
+function PhonePreview({bot,messages,typing,onSend,inputV,setInputV,quickR=[]}){
+  const biz=getBiz(bot?.type||"shop");
+  const ref=useRef();
+  useEffect(()=>{if(ref.current)ref.current.scrollTop=ref.current.scrollHeight;},[messages,typing]);
+  return(
+    <div style={{background:"#1c1c1c",borderRadius:32,padding:10,width:270,boxShadow:"0 20px 60px rgba(0,0,0,.7)"}}>
+      <div style={{background:"#f0f0f0",borderRadius:24,overflow:"hidden"}}>
+        <div style={{background:S.greenD,padding:"9px 13px",display:"flex",alignItems:"center",gap:9}}>
+          <div style={{width:33,height:33,borderRadius:"50%",background:"rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>{biz.e}</div>
+          <div>
+            <div style={{color:"#fff",fontSize:12,fontWeight:600}}>{bot?.name||"Your Business"}</div>
+            <div style={{color:"rgba(255,255,255,.6)",fontSize:10,display:"flex",alignItems:"center",gap:3}}><span style={{width:5,height:5,borderRadius:"50%",background:"#4ade80",display:"inline-block"}}/>Online \u00b7 24/7</div>
+          </div>
+        </div>
+        <div ref={ref} style={{padding:"9px 8px",minHeight:260,maxHeight:300,overflowY:"auto",display:"flex",flexDirection:"column",gap:6,background:"#e5ddd5"}}>
+          {messages.map((m,i)=>(
+            <div key={i} className="msg" style={{maxWidth:"82%",padding:"6px 9px",fontSize:11,lineHeight:1.5,whiteSpace:"pre-line",
+              ...(m.role==="assistant"?{background:"#fff",borderRadius:"0 9px 9px 9px",alignSelf:"flex-start",borderLeft:"3px solid "+S.green,boxShadow:"0 1px 2px rgba(0,0,0,.1)"}
+              :{background:"#d9fdd3",borderRadius:"9px 9px 0 9px",alignSelf:"flex-end",marginLeft:"auto",boxShadow:"0 1px 2px rgba(0,0,0,.1)"})}}>
+              {m.text}
+              <div style={{fontSize:8,color:"#999",textAlign:"right",marginTop:1}}>{m.time}{m.role==="user"?" \u2713\u2713":""}</div>
+            </div>
+          ))}
+          {typing&&<div style={{display:"flex",gap:3,padding:"7px 10px",background:"#fff",borderRadius:"0 9px 9px 9px",width:"fit-content"}}>
+            {[0,1,2].map(i=><span key={i} style={{width:5,height:5,borderRadius:"50%",background:"#aaa",display:"inline-block",animation:`blink 1.2s ${i*.2}s infinite`}}/>)}
+          </div>}
+        </div>
+        {quickR.length>0&&onSend&&<div style={{padding:"4px 7px",background:"#f0f0f0",display
